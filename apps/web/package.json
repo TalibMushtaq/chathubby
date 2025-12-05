@@ -11,10 +11,9 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@repo/cache": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@prisma/client": "workspace:*",
-    "pg": "workspace:*",
     "dotenv": "^17.2.3",
     "next": "^16.0.7",
     "react": "^19.2.0",
