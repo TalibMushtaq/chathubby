@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ChatRoom {
+  id             String           @id
+  name           String
+  description    String?
+  createdBy      String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  User           User             @relation(fields: [createdBy], references: [id])
+  ChatRoomMember ChatRoomMember[]
+  Message        Message[]
+}
+
+model ChatRoomMember {
+  id         String   @id
+  userId     String
+  chatRoomId String
+  role       String
+  joinedAt   DateTime @default(now())
+  ChatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  User       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, chatRoomId])
+}
+
+model DirectChat {
+  id                            String    @id
+  user1Id                       String
+  user2Id                       String
+  createdAt                     DateTime  @default(now())
+  User_DirectChat_user1IdToUser User      @relation("DirectChat_user1IdToUser", fields: [user1Id], references: [id])
+  User_DirectChat_user2IdToUser User      @relation("DirectChat_user2IdToUser", fields: [user2Id], references: [id])
+  Message                       Message[]
+
+  @@unique([user1Id, user2Id])
+}
+
+model Message {
+  id           String      @id
+  content      String?
+  senderId     String
+  chatRoomId   String?
+  directChatId String?
+  messageType  String?
+  fileUri      String?
+  fileName     String?
+  fileSize     Int?
+  createdAt    DateTime    @default(now())
+  ChatRoom     ChatRoom?   @relation(fields: [chatRoomId], references: [id])
+  DirectChat   DirectChat? @relation(fields: [directChatId], references: [id])
+  User         User        @relation(fields: [senderId], references: [id])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                                  String           @id
+  email                               String           @unique
+  username                            String           @unique
+  passwordHash                        String
+  avatar                              String?
+  createdAt                           DateTime         @default(now())
+  updatedAt                           DateTime
+  ChatRoom                            ChatRoom[]
+  ChatRoomMember                      ChatRoomMember[]
+  DirectChat_DirectChat_user1IdToUser DirectChat[]     @relation("DirectChat_user1IdToUser")
+  DirectChat_DirectChat_user2IdToUser DirectChat[]     @relation("DirectChat_user2IdToUser")
+  Message                             Message[]
+  Session                             Session[]
+}
