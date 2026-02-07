@@ -1,7 +1,6 @@
 import session from "express-session";
 import { RedisStore } from "connect-redis";
-import { redis } from "../src/lib/redis";
-
+import { redis } from "../lib/redis";
 export function sessionMiddleware() {
   return session({
     name: "chathub.sid",

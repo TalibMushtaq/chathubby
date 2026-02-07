@@ -1,34 +1,37 @@
 import "dotenv/config";
 import express from "express";
-
-import { connectRedis, redis } from "./lib/redis";
+import { connectRedis } from "./lib/redis";
 import { prisma } from "../db/prisma";
-import { registerDbTestRoute } from "../db/db-test";
+import cors from "cors";
+import { sessionMiddleware } from "./middleware/session";
+import authRouter from "./routes/auth";
+
+const app = express();
+
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+  }),
+);
+
+app.use(sessionMiddleware());
+app.use("/auth", authRouter);
 
 async function main() {
-  const app = express();
-
-  app.use(express.json());
-
-  // Connect Redis before routes
   await connectRedis();
-
-  // Register /db-test
-  registerDbTestRoute({ app, redis, prisma });
-
-  // Basic root route
+  await prisma.$queryRaw`SELECT 1`;
   app.get("/", (req, res) => {
-    res.send("ChatHub server running");
+    res.send("Chathub server running");
   });
-
-  const port = Number(process.env.PORT || 4000);
+  const port = Number(3000);
 
   app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`server running on http://localhost:${port}`);
   });
 }
 
 main().catch((err) => {
-  console.error(" Server failed to start:", err);
+  console.error("server failed to start : ", err);
   process.exit(1);
 });
