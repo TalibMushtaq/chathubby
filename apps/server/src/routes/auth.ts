@@ -1,9 +1,9 @@
 import express from "express";
 
-import signupRouter from "./signup";
-import loginRouter from "./login";
-import logoutRouter from "./logout";
-import meRouter from "./me";
+import signupRouter from "./auth/signup";
+import loginRouter from "./auth/login";
+import logoutRouter from "./auth/logout";
+import meRouter from "./auth/me";
 
 const router = express.Router();
 
