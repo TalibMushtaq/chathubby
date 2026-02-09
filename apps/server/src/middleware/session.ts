@@ -3,7 +3,7 @@ import { RedisStore } from "connect-redis";
 import { redis } from "../lib/redis";
 export function sessionMiddleware() {
   return session({
-    name: "chathub.sid",
+    name: "chathubby.sid",
     store: new RedisStore({ client: redis }),
     secret: process.env.SESSION_SECRET!,
     resave: false,

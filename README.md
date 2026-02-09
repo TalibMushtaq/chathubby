@@ -1,6 +1,6 @@
-# 💬 ChatHub
+# 💬 ChatHubby
 
-A modern real-time chat application built with Next.js, Socket.io, and Prisma. ChatHub provides a seamless messaging experience with a clean, responsive interface and robust backend architecture.
+A modern real-time chat application built with Next.js, Socket.io, and Prisma. ChatHubby provides a seamless messaging experience with a clean, responsive interface and robust backend architecture.
 
 ## ✨ Features
 
@@ -45,7 +45,7 @@ This project uses a monorepo structure powered by Turborepo and PNPM workspaces:
 
    ```bash
    git clone <repository-url>
-   cd ChatHub
+   cd ChatHubby
    ```
 
 2. **Install dependencies**
@@ -124,7 +124,7 @@ The application uses PostgreSQL with Prisma ORM. Key models include:
 ## 📁 Project Structure
 
 ```
-ChatHub/
+ChatHubby/
 ├── apps/
 │   ├── web/                 # Next.js frontend
 │   └── server/         # Express.js HTTP API, Socket.Io
