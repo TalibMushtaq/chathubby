@@ -7,7 +7,7 @@ datasource db {
 }
 
 model ChatRoom {
-  id             String           @id
+  id             String           @id @default(cuid())
   name           String
   description    String?
   createdBy      String
@@ -19,7 +19,7 @@ model ChatRoom {
 }
 
 model ChatRoomMember {
-  id         String   @id
+  id         String   @id @default(cuid())
   userId     String
   chatRoomId String
   role       String
@@ -31,7 +31,7 @@ model ChatRoomMember {
 }
 
 model DirectChat {
-  id                            String    @id
+  id                            String    @id @default(cuid())
   user1Id                       String
   user2Id                       String
   createdAt                     DateTime  @default(now())
@@ -43,7 +43,7 @@ model DirectChat {
 }
 
 model Message {
-  id           String      @id
+  id           String      @id @default(cuid())
   content      String?
   senderId     String
   chatRoomId   String?
@@ -58,12 +58,6 @@ model Message {
   User         User        @relation(fields: [senderId], references: [id])
 }
 
-model Session {
-  id        String   @id
-  userId    String
-  expiresAt DateTime
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model User {
   id                                  String           @id
@@ -78,5 +72,4 @@ model User {
   DirectChat_DirectChat_user1IdToUser DirectChat[]     @relation("DirectChat_user1IdToUser")
   DirectChat_DirectChat_user2IdToUser DirectChat[]     @relation("DirectChat_user2IdToUser")
   Message                             Message[]
-  Session                             Session[]
 }

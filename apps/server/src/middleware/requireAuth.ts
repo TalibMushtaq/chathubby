@@ -12,8 +12,10 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       where: { id: userid },
       select: {
         id: true,
+        email: true,
         username: true,
         avatar: true,
+        createdAt: true,
       },
     });
 

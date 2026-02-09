@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import express from "express";
-import { verifyPassword } from "../lib/password";
-import { prisma } from "../../db/prisma";
+import { verifyPassword } from "../../lib/password";
+import { prisma } from "../../../db/prisma";
 import { userZod } from "@repo/validators";
 
 const router = express.Router();

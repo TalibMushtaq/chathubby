@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import express from "express";
-import { prisma } from "../../db/prisma";
+import { prisma } from "../../../db/prisma";
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.get("/me", async (req: Request, res: Response) => {
       where: { id: userid },
       select: {
         id: true,
-        email: true,
+        email: true, // update it to use auth middleware for user data
         username: true,
         avatar: true,
         createdAt: true,

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import express from "express";
-import { hashPassword } from "../lib/password";
-import { prisma } from "../../db/prisma";
+import { hashPassword } from "../../lib/password";
+import { prisma } from "../../../db/prisma";
 import { userZod } from "@repo/validators";
 import crypto from "node:crypto";
 
