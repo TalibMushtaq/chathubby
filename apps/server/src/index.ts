@@ -4,7 +4,8 @@ import { connectRedis } from "./lib/redis";
 import { prisma } from "../db/prisma";
 import cors from "cors";
 import { sessionMiddleware } from "./middleware/session";
-import authRouter from "./routes/auth";
+import authRoutes from "./routes/auth";
+import dmRoutes from "./routes/dm";
 
 const app = express();
 app.use(express.json());
@@ -17,7 +18,8 @@ app.use(
 );
 
 app.use(sessionMiddleware());
-app.use("/auth", authRouter);
+app.use("/auth", authRoutes);
+app.use("/api/dm", dmRoutes);
 
 async function main() {
   await connectRedis();

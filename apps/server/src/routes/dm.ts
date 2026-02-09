@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
 import requireAuth from "../middleware/requireAuth";
 import { prisma } from "../../db/prisma";
-import { error } from "console";
 
 const router = Router();
 
@@ -221,3 +220,5 @@ router.get(
     }
   },
 );
+
+export default router;
