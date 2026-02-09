@@ -7,6 +7,7 @@ import { sessionMiddleware } from "./middleware/session";
 import authRouter from "./routes/auth";
 
 const app = express();
+app.use(express.json());
 
 app.use(
   cors({
@@ -20,7 +21,10 @@ app.use("/auth", authRouter);
 
 async function main() {
   await connectRedis();
-  await prisma.$queryRaw`SELECT 1`;
+  const sat2 = await prisma.$queryRaw`SELECT 1`;
+  if (sat2) {
+    console.log("postgres/prisma db connected");
+  }
   app.get("/", (req, res) => {
     res.send("Chathub server running");
   });

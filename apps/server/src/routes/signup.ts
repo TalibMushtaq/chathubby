@@ -8,6 +8,14 @@ import crypto from "node:crypto";
 const router = express.Router();
 
 router.post("/signup", async (req: Request, res: Response) => {
+  if (req.session.userId) {
+    return res.status(200).json({
+      ok: true,
+      message: "Already logged in",
+      userId: req.session.userId,
+    });
+  }
+
   try {
     const parseResult = userZod.signup.safeParse(req.body);
 

@@ -19,6 +19,16 @@ const passwordSchema = z
 
 const avatarSchema = z.url().trim().optional().nullable();
 
+const loginWithEmail = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+const loginWithUsername = z.object({
+  username: usernameSchema,
+  password: passwordSchema,
+});
+
 export const userZod = {
   email: emailSchema,
   username: usernameSchema,
@@ -31,10 +41,7 @@ export const userZod = {
     password: passwordSchema,
   }),
 
-  login: z.object({
-    email: emailSchema,
-    password: z.string().min(1, "Password is required"),
-  }),
+  login: z.union([loginWithEmail, loginWithUsername]),
 
   updateMe: z
     .object({
