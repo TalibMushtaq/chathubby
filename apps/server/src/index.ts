@@ -2,12 +2,16 @@ import "dotenv/config";
 import express from "express";
 import { connectRedis } from "./lib/redis";
 import { prisma } from "../db/prisma";
+import http from "http";
+import { createIO } from "./socket";
 import cors from "cors";
 import { sessionMiddleware } from "./middleware/session";
 import authRoutes from "./routes/auth";
 import dmRoutes from "./routes/dm";
 
 const app = express();
+const httpServer = http.createServer(app);
+const io = createIO(httpServer);
 app.use(express.json());
 
 app.use(
@@ -18,6 +22,12 @@ app.use(
 );
 
 app.use(sessionMiddleware());
+
+app.use((req, _res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use("/auth", authRoutes);
 app.use("/api/dm", dmRoutes);
 
@@ -31,9 +41,13 @@ async function main() {
     res.send("Chathub server running");
   });
   const port = Number(3000);
+  const ioPort = Number(4000);
 
   app.listen(port, () => {
     console.log(`server running on http://localhost:${port}`);
+  });
+  httpServer.listen(ioPort, () => {
+    console.log(`web socket server running on ${ioPort}`);
   });
 }
 

@@ -35,6 +35,7 @@ model DirectChat {
   user1Id                       String
   user2Id                       String
   createdAt                     DateTime  @default(now())
+  lastMessageAt                 DateTime?
   User_DirectChat_user1IdToUser User      @relation("DirectChat_user1IdToUser", fields: [user1Id], references: [id])
   User_DirectChat_user2IdToUser User      @relation("DirectChat_user2IdToUser", fields: [user2Id], references: [id])
   Message                       Message[]
@@ -53,6 +54,9 @@ model Message {
   fileName     String?
   fileSize     Int?
   createdAt    DateTime    @default(now())
+  isDeleted    Boolean     @default(false)
+  deletedAt    DateTime?
+  editedAt     DateTime?
   ChatRoom     ChatRoom?   @relation(fields: [chatRoomId], references: [id])
   DirectChat   DirectChat? @relation(fields: [directChatId], references: [id])
   User         User        @relation(fields: [senderId], references: [id])

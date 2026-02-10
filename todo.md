@@ -3,16 +3,17 @@
 ## Backlog
 
 - [ ] add anonymous entry in rooms chat
-- [ ] add Delete api to delete sent message (30 min window, soft delete)
 - [ ] add inbox endpoint: `GET /api/dm/my-chats` (list all DM chats)
+- [x] add edit for chat sent , time 5 min
 - [ ] add DM pagination (cursor / infinite scroll)
-- [ ] add Socket.io realtime for DMs (emit on REST send)
+- [x] add Socket.io realtime for DMs (emit on REST send)
 - [ ] add Socket.io system for ChatRoom messages (socket-first)
 - [ ] add “mark as read” / unread count
+- [ ] Store user snapshot in session
 
 ## In Progress
 
-- [ ] (empty)
+- [x] add Delete api to delete sent message (30 min window, soft delete)
 
 ## Completed ✓
 

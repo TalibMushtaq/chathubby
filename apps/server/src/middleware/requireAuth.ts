@@ -6,7 +6,7 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const userid = req.session.userId;
 
     if (!userid)
-      return res.status(403).json({ ok: false, error: "user not logged in" });
+      return res.status(401).json({ ok: false, error: "user not logged in" });
 
     const user = await prisma.user.findUnique({
       where: { id: userid },
