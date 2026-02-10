@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
 import requireAuth from "../middleware/requireAuth";
 import { prisma } from "../../db/prisma";
-import { error } from "console";
 
 const router = Router();
 
@@ -187,7 +186,7 @@ router.get(
 );
 router.get("/inbox", requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     const chats = await prisma.directChat.findMany({
       where: {
@@ -244,7 +243,7 @@ router.delete(
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const userid = req.user.id;
+      const userid = req.user?.id;
       const messageId = String(req.params.messageId);
 
       const msg = await prisma.message.findUnique({
@@ -301,7 +300,7 @@ router.patch(
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.id;
       const messageId = String(req.params.messageId);
       const content = String(req.body.content ?? "").trim();
 

@@ -1,15 +1,33 @@
 import type { Request, Response, NextFunction } from "express";
 import { prisma } from "../../db/prisma";
 
+const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+
 const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userid = req.session.userId;
+    const userId = req.session.userId;
 
-    if (!userid)
+    if (!userId) {
       return res.status(401).json({ ok: false, error: "user not logged in" });
+    }
 
+    // ------------------ Fast path: session cache ------------------
+    const cached = req.session.userCache as
+      | { user: any; cachedAt: number }
+      | undefined;
+
+    if (
+      cached?.user?.id === userId &&
+      typeof cached.cachedAt === "number" &&
+      Date.now() - cached.cachedAt < CACHE_TTL_MS
+    ) {
+      req.user = cached.user;
+      return next();
+    }
+
+    // ------------------ Slow path: DB fetch ------------------
     const user = await prisma.user.findUnique({
-      where: { id: userid },
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -21,11 +39,18 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     if (!user) {
       req.session.destroy(() => {});
-      return res.status(401).json({ ok: false, error: "user does not exitst" });
+      return res.status(401).json({ ok: false, error: "user does not exist" });
     }
+
+    // store snapshot in session
+    req.session.userCache = {
+      user,
+      cachedAt: Date.now(),
+    };
+
     req.user = user;
-    next();
-  } catch (err: any) {
+    return next();
+  } catch (err) {
     console.log(err, "auth middleware");
     return res.status(500).json({ ok: false, error: "server error" });
   }

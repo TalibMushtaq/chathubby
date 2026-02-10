@@ -3,7 +3,7 @@
 ## Backlog
 
 - [ ] add anonymous entry in rooms chat
-- [ ] add inbox endpoint: `GET /api/dm/my-chats` (list all DM chats)
+- [x] add inbox endpoint: `GET /api/dm/my-chats` (list all DM chats)
 - [x] add edit for chat sent , time 5 min
 - [ ] add DM pagination (cursor / infinite scroll)
 - [x] add Socket.io realtime for DMs (emit on REST send)
