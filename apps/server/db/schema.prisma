@@ -5,29 +5,85 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+enum ChatRoomRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 model ChatRoom {
   id             String           @id @default(cuid())
   name           String
   description    String?
   createdBy      String
   createdAt      DateTime         @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime         @updatedAt
+
   User           User             @relation(fields: [createdBy], references: [id])
+
   ChatRoomMember ChatRoomMember[]
   Message        Message[]
+  invitations    RoomInvitation[]
+  joinRequests   RoomJoinRequest[]
+  joinLinks      RoomJoinLink[]
+
+
 }
 
 model ChatRoomMember {
-  id         String   @id @default(cuid())
+  id         String       @id @default(cuid())
   userId     String
   chatRoomId String
-  role       String
-  joinedAt   DateTime @default(now())
-  ChatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
-  User       User     @relation(fields: [userId], references: [id])
+  role       ChatRoomRole @default(MEMBER)
+  joinedAt   DateTime     @default(now())
+
+  ChatRoom   ChatRoom     @relation(fields: [chatRoomId], references: [id])
+  User       User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, chatRoomId])
+  @@index([chatRoomId])
+  @@index([userId])
+  
+}
+
+
+
+model Message {
+  id           String      @id @default(cuid())
+  content      String?
+  senderId     String
+  chatRoomId   String?
+  directChatId String?
+
+  messageType  String?
+  fileUri      String?
+  fileName     String?
+  fileSize     Int?
+
+  createdAt    DateTime    @default(now())
+
+  isDeleted    Boolean     @default(false)
+  deletedAt    DateTime?
+  editedAt     DateTime?
+
+  ChatRoom     ChatRoom?   @relation(fields: [chatRoomId], references: [id])
+  DirectChat   DirectChat? @relation(fields: [directChatId], references: [id])
+  User         User        @relation(fields: [senderId], references: [id])
+
+  @@index([chatRoomId, createdAt])
+  @@index([directChatId, createdAt])
 }
 
 model DirectChat {
@@ -43,26 +99,6 @@ model DirectChat {
   @@unique([user1Id, user2Id])
 }
 
-model Message {
-  id           String      @id @default(cuid())
-  content      String?
-  senderId     String
-  chatRoomId   String?
-  directChatId String?
-  messageType  String?
-  fileUri      String?
-  fileName     String?
-  fileSize     Int?
-  createdAt    DateTime    @default(now())
-  isDeleted    Boolean     @default(false)
-  deletedAt    DateTime?
-  editedAt     DateTime?
-  ChatRoom     ChatRoom?   @relation(fields: [chatRoomId], references: [id])
-  DirectChat   DirectChat? @relation(fields: [directChatId], references: [id])
-  User         User        @relation(fields: [senderId], references: [id])
-}
-
-
 model User {
   id                                  String           @id
   email                               String           @unique
@@ -76,4 +112,73 @@ model User {
   DirectChat_DirectChat_user1IdToUser DirectChat[]     @relation("DirectChat_user1IdToUser")
   DirectChat_DirectChat_user2IdToUser DirectChat[]     @relation("DirectChat_user2IdToUser")
   Message                             Message[]
+  joinRequests                        RoomJoinRequest[]
+  reviewedJoinRequests                RoomJoinRequest[] @relation("JoinRequestReviewedBy")
+
+
+  receivedInvitations                 RoomInvitation[] @relation("InvitedUser")
+  sentInvitations                     RoomInvitation[] @relation("InvitedBy")
+  createdJoinLinks                    RoomJoinLink[]
+
+}
+
+model RoomInvitation{
+  id                         String              @id @default(uuid())
+
+  roomid                     String
+  room                       ChatRoom            @relation(fields: [roomid], references: [id], onDelete: Cascade)
+
+  invitedUserId              String           
+  invitedUser                User                @relation("InvitedUser", fields: [invitedUserId], references: [id], onDelete: Cascade)
+
+  invitedById                String
+  invitedBy                  User                @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+  
+  status                     InvitationStatus    @default(PENDING)
+
+  createdAT                  DateTime            @default(now())
+  expiresAt                  DateTime?
+
+  @@unique([roomid , invitedUserId])
+}
+
+
+model RoomJoinRequest {
+  id                    String                  @id @default(uuid())
+
+  roomId                String  
+  room                  ChatRoom                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId                String
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status                JoinRequestStatus       @default(PENDING)
+
+  reviewedById          String?
+  reviewedBy            User?                   @relation("JoinRequestReviewedBy", fields: [reviewedById], references: [id])
+
+  createdAt             DateTime                @default(now())
+  reviewedAt            DateTime?
+
+  @@unique([roomId, userId])
+
+}
+
+model RoomJoinLink {
+  id                    String                  @id @default(uuid())
+
+  token                 String                  @unique
+  roomId                String
+  room                  ChatRoom                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  createdById           String
+  createdBy             User                    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  maxUses               Int?
+  usedCount             Int                     @default(0)
+
+  expiresAt             DateTime?
+  isActive              Boolean                 @default(true)
+
+  createdAt             DateTime                @default(now())
 }
