@@ -1,13 +1,10 @@
 import { Router, Request, Response } from "express";
 import requireAuth from "../../middleware/requireAuth";
 import { prisma } from "../../../db/prisma";
-import { error } from "node:console";
-import { ok } from "node:assert";
-
 const router = Router();
 
 // --------------------------Create Room -------------------------
-router.post("/room", requireAuth, async (req: Request, res: Response) => {
+router.post("/create", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const name = String(req.body.name ?? "").trim();
@@ -49,7 +46,7 @@ router.post("/room", requireAuth, async (req: Request, res: Response) => {
 
 //------------------------------------------ List My Rooms ---------------------------------------
 
-router.get("/", requireAuth, async (req: Request, res: Response) => {
+router.get("/rooms", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
 
