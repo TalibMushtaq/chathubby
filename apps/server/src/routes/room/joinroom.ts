@@ -2,6 +2,7 @@ import { Router, Request, Response, response } from "express";
 import requireAuth from "../../middleware/requireAuth";
 import { prisma } from "../../../db/prisma";
 import crypto from "crypto";
+import { connect } from "http2";
 
 const router = Router();
 
@@ -124,3 +125,88 @@ router.get("/join/:token", requireAuth, async (req: Request, res: Response) => {
     return res.status(500).json({ ok: false, error: "Server error" });
   }
 });
+
+router.post(
+  "/join/:token",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const token = String(req.params.token);
+
+      await prisma.$transaction(async (tx) => {
+        const link = await tx.roomJoinLink.findUnique({
+          where: { token },
+        });
+
+        if (!link) {
+          throw new Error("NOT_FOUND");
+        }
+
+        const now = new Date();
+
+        if (!link.isActive) {
+          throw new Error("INACTIVE");
+        }
+
+        if (link.expiresAt && link.expiresAt < now) {
+          throw new Error("EXPIRED");
+        }
+
+        if (link.maxUses !== null && link.usedCount >= link.maxUses) {
+          throw new Error("MAX_USES");
+        }
+
+        const member = await tx.chatRoomMember.findUnique({
+          where: {
+            userId_chatRoomId: {
+              userId,
+              chatRoomId: link.roomId,
+            },
+          },
+        });
+
+        if (member) {
+          throw new Error("ALREADY_MEMBER");
+        }
+
+        await tx.chatRoomMember.create({
+          data: {
+            User: { connect: { id: userId } },
+            ChatRoom: { connect: { id: link.roomId } },
+            role: "MEMBER",
+          },
+        });
+
+        await tx.roomJoinLink.update({
+          where: { id: link.id },
+          data: {
+            usedCount: { increment: 1 },
+          },
+        });
+      });
+
+      return res.status(200).json({ ok: true });
+    } catch (err) {
+      if (err instanceof Error) {
+        switch (err.message) {
+          case "NOT_FOUND":
+            return res.status(404).json({ ok: false, error: "Link not found" });
+          case "INACTIVE":
+          case "EXPIRED":
+          case "MAX_USES":
+            return res
+              .status(410)
+              .json({ ok: false, error: "Link is no longer valid" });
+          case "ALREADY_MEMBER":
+            return res
+              .status(409)
+              .json({ ok: false, error: "Already a member" });
+        }
+      }
+
+      console.error(err);
+      return res.status(500).json({ ok: false, error: "Server error" });
+    }
+  },
+);
