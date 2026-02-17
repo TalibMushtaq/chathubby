@@ -2,10 +2,10 @@ import { Router, Request, Response, response } from "express";
 import requireAuth from "../../middleware/requireAuth";
 import { prisma } from "../../../db/prisma";
 import crypto from "crypto";
-import { connect } from "http2";
 
 const router = Router();
 
+//------------------------------------ Crate Room Join Link --------------------------------------------
 router.post(
   "/:roomId/join-links",
   requireAuth,
@@ -81,7 +81,7 @@ router.post(
     }
   },
 );
-
+//-----------------------------validate token / Room status -----------------------------
 router.get("/join/:token", requireAuth, async (req: Request, res: Response) => {
   try {
     const token = String(req.params.token);
@@ -126,6 +126,7 @@ router.get("/join/:token", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
+// ----------------------Join Room-------------------------------------
 router.post(
   "/join/:token",
   requireAuth,
@@ -207,6 +208,113 @@ router.post(
 
       console.error(err);
       return res.status(500).json({ ok: false, error: "Server error" });
+    }
+  },
+);
+
+router.patch(
+  "/:roomId/join-links/:linkId",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const roomId = String(req.params.roomId);
+      const linkId = String(req.params.linkId);
+
+      const membership = await prisma.chatRoomMember.findUnique({
+        where: {
+          userId_chatRoomId: {
+            userId,
+            chatRoomId: roomId,
+          },
+        },
+        select: { role: true },
+      });
+
+      if (
+        !membership ||
+        (membership.role !== "OWNER" && membership.role !== "ADMIN")
+      ) {
+        return res.status(403).json({
+          ok: false,
+          error: "Not authorized",
+        });
+      }
+
+      const link = await prisma.roomJoinLink.findUnique({
+        where: { id: linkId },
+        select: { id: true, roomId: true, isActive: true },
+      });
+
+      if (!link || link.roomId !== roomId) {
+        return res.status(404).json({
+          ok: false,
+          error: "Link not found",
+        });
+      }
+
+      await prisma.roomJoinLink.update({
+        where: { id: linkId },
+        data: { isActive: false },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "Link deactivated",
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        ok: false,
+        error: "Internal server error",
+      });
+    }
+  },
+);
+
+//---------------------------retun crated links by user----------------------------
+
+router.get(
+  "/join-links/mine",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+
+      const links = await prisma.roomJoinLink.findMany({
+        where: {
+          createdById: userId,
+        },
+        select: {
+          id: true,
+          token: true,
+          maxUses: true,
+          usedCount: true,
+          expiresAt: true,
+          isActive: true,
+          createdAt: true,
+          room: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        links,
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        ok: false,
+        error: "Internal server error",
+      });
     }
   },
 );
