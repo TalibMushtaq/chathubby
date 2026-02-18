@@ -15,7 +15,6 @@ enum InvitationStatus {
   PENDING
   ACCEPTED
   REJECTED
-  EXPIRED
 }
 
 enum JoinRequestStatus {
@@ -122,25 +121,23 @@ model User {
 
 }
 
-model RoomInvitation{
-  id                         String              @id @default(uuid())
+model RoomInvitation {
+  id              String   @id @default(uuid())
 
-  roomid                     String
-  room                       ChatRoom            @relation(fields: [roomid], references: [id], onDelete: Cascade)
+  roomId          String
+  room            ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  invitedUserId              String           
-  invitedUser                User                @relation("InvitedUser", fields: [invitedUserId], references: [id], onDelete: Cascade)
+  invitedUserId   String
+  invitedUser     User     @relation("InvitedUser", fields: [invitedUserId], references: [id], onDelete: Cascade)
 
-  invitedById                String
-  invitedBy                  User                @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
-  
-  status                     InvitationStatus    @default(PENDING)
+  invitedById     String
+  invitedBy       User     @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
 
-  createdAT                  DateTime            @default(now())
-  expiresAt                  DateTime?
+  status          InvitationStatus @default(PENDING)
 
-  @@unique([roomid , invitedUserId])
+  createdAt       DateTime @default(now())
 }
+
 
 
 model RoomJoinRequest {
