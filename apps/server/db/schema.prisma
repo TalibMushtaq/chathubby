@@ -157,7 +157,6 @@ model RoomJoinRequest {
   createdAt             DateTime                @default(now())
   reviewedAt            DateTime?
 
-  @@unique([roomId, userId])
 
 }
 

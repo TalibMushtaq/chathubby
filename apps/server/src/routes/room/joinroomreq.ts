@@ -1,303 +1,209 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../../../db/prisma";
 import requireAuth from "../../middleware/requireAuth";
-import { error } from "node:console";
+import { error } from "console";
 
 const router = Router();
 
-class AppError extends Error {
-  statusCode: number;
-
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
-
 router.post(
-  "/:roomId/invitations",
+  "/:roomId/join-request",
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const myId = req.user!.id;
+      const userId = req.user!.id;
       const roomId = String(req.params.roomId);
-      const targetUser = String(req.body.targetUserId);
 
-      const userExists = await prisma.user.findUnique({
+      const room = await prisma.chatRoom.findUnique({
         where: {
-          id: targetUser,
+          id: roomId,
         },
         select: {
           id: true,
+          name: true,
         },
       });
-      const verify = await prisma.chatRoomMember.findUnique({
+
+      if (!room)
+        return res.status(404).json({ ok: false, error: "Room not found" });
+
+      const existingMember = await prisma.chatRoomMember.findUnique({
         where: {
           userId_chatRoomId: {
-            userId: myId,
-            chatRoomId: roomId,
+            userId: userId,
+            chatRoomId: room.id,
           },
-        },
-        select: {
-          role: true,
         },
       });
 
-      if (!verify || (verify.role !== "ADMIN" && verify.role !== "OWNER"))
-        return res.status(403).json({ ok: false, error: "Not authorized" });
+      if (existingMember)
+        return res.status(400).json({ ok: false, error: "Already a member" });
 
-      if (!userExists)
-        return res
-          .status(404)
-          .json({ ok: false, error: "target user does not exist" });
-
-      const isMember = await prisma.chatRoomMember.findUnique({
+      const existingPending = await prisma.roomJoinRequest.findFirst({
         where: {
-          userId_chatRoomId: {
-            userId: targetUser,
-            chatRoomId: roomId,
-          },
-        },
-        select: {
-          joinedAt: true,
-          role: true,
-        },
-      });
-
-      if (isMember) {
-        return res.status(409).json({
-          ok: false,
-          error: "Already a Member",
-          role: isMember.role,
-          joinedAt: isMember.joinedAt,
-        });
-      }
-
-      const pending = await prisma.roomInvitation.findFirst({
-        where: {
-          roomId: roomId,
-          invitedUserId: targetUser,
+          roomId,
+          userId,
           status: "PENDING",
         },
-        select: {
-          id: true,
-        },
+        select: { id: true },
       });
 
-      if (pending) {
-        return res.status(409).json({
-          ok: false,
-          error: "Invitation already sent",
-          id: pending.id,
+      if (existingPending) {
+        return res.status(400).json({
+          error: "You already have a pending request",
+          reqId: existingPending.id,
         });
       }
-      const sent = await prisma.roomInvitation.create({
+
+      const joinRequsest = await prisma.roomJoinRequest.create({
         data: {
-          roomId: roomId,
-          invitedUserId: targetUser,
-          invitedById: myId,
-        },
-        select: {
-          id: true,
-          createdAt: true,
-          status: true,
+          roomId: room.id,
+          userId: userId,
         },
       });
 
-      return res.status(201).json({
-        ok: true,
-        id: sent.id,
-        createdAt: sent.createdAt,
-        status: sent.status,
-      });
+      return res.status(201).json({ ok: true, joinRequsest });
     } catch (err) {
       console.log(err);
-      return res.status(500).json({ ok: false, error: "Server Error" });
+      return res.status(500).json({
+        ok: false,
+        error: "Server error",
+      });
     }
   },
 );
 
 router.get(
-  "/invitation/sent",
+  "/:roomId/join-requests",
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const myId = req.user!.id;
-      const invitations = await prisma.roomInvitation.findMany({
+      const userId = req.user!.id;
+      const roomId = String(req.params.roomId);
+      const status = req.query.status as
+        | "PENDING"
+        | "APPROVED"
+        | "REJECTED"
+        | undefined;
+
+      // 1️⃣ Ensure requester is OWNER or ADMIN
+      const membership = await prisma.chatRoomMember.findUnique({
         where: {
-          invitedById: myId,
-          status: "PENDING",
+          userId_chatRoomId: {
+            userId: userId,
+            chatRoomId: roomId,
+          },
         },
-        orderBy: {
-          createdAt: "desc",
+      });
+
+      if (!membership || !["OWNER", "ADMIN"].includes(membership.role)) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const requests = await prisma.roomJoinRequest.findMany({
+        where: {
+          roomId,
+          ...(status && { status }),
         },
-        select: {
-          id: true,
-          status: true,
-          createdAt: true,
-          room: {
+        include: {
+          user: {
             select: {
               id: true,
-              name: true,
+              username: true,
             },
           },
-          invitedUser: {
+          reviewedBy: {
             select: {
               id: true,
               username: true,
             },
           },
         },
-      });
-
-      return res.status(200).json({ ok: true, invitations });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({ ok: true, error: "Server Error" });
-    }
-  },
-);
-
-router.get(
-  "/invitation/received",
-  requireAuth,
-  async (req: Request, res: Response) => {
-    try {
-      const myId = req.user!.id;
-
-      const invitations = await prisma.roomInvitation.findMany({
-        where: {
-          invitedUserId: myId,
-          status: "PENDING",
-        },
         orderBy: {
           createdAt: "desc",
         },
-        select: {
-          id: true,
-          createdAt: true,
-          room: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          invitedBy: {
-            select: {
-              id: true,
-              username: true,
-            },
-          },
-        },
       });
 
-      return res.status(200).json({
+      return res.json({
         ok: true,
-        invitations,
+        requests,
       });
     } catch (err) {
-      console.log(err);
-      return res.status(500).json({ ok: false, error: "Server Error" });
+      console.error(err);
+      return res.status(500).json({ error: "Internal server error" });
     }
   },
 );
 
 router.patch(
-  "/invitations/:invitationId",
+  "/:roomId/join-requests/:requestId",
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const myId = req.user!.id;
-      const invitationId = String(req.params.invitationId);
-      const status = req.body.status;
+      const reviewerId = req.user!.id;
+      const roomId = String(req.params.roomId);
+      const requestId = String(req.params.requestId);
+      const { action } = req.body;
 
-      if (status !== "ACCEPTED" && status !== "REJECTED") {
-        return res.status(400).json({
-          ok: false,
-          error: "Invalid status value",
-        });
+      if (!["APPROVED", "REJECTED"].includes(action)) {
+        return res.status(400).json({ error: "Invalid action" });
+      }
+      const access = await prisma.chatRoomMember.findUnique({
+        where: {
+          userId_chatRoomId: {
+            userId: reviewerId,
+            chatRoomId: roomId,
+          },
+        },
+        select: {
+          role: true,
+        },
+      });
+      if (!access || (access.role !== "ADMIN" && access.role !== "OWNER")) {
+        return res.status(403).json({ ok: false, error: "Not Authorized" });
       }
 
-      if (status === "REJECTED") {
-        const result = await prisma.roomInvitation.updateMany({
-          where: {
-            id: invitationId,
-            invitedUserId: myId,
-            status: "PENDING",
-          },
-          data: {
-            status: "REJECTED",
-          },
-        });
+      const request = await prisma.roomJoinRequest.findUnique({
+        where: {
+          id: requestId,
+        },
+      });
 
-        if (result.count === 0) {
-          return res.status(409).json({
-            ok: false,
-            error: "Invitation not found or already processed",
-          });
-        }
+      if (!request)
+        return res.status(404).json({ ok: false, error: "request not found" });
 
-        return res.status(200).json({ ok: true, status: "REJECTED" });
+      if (request.status !== "PENDING") {
+        return res
+          .status(400)
+          .json({ ok: false, error: "request already reviewed" });
       }
 
-      if (status === "ACCEPTED") {
-        await prisma.$transaction(async (tx) => {
-          const invitation = await tx.roomInvitation.findUnique({
-            where: { id: invitationId },
-            select: {
-              id: true,
-              roomId: true,
-              invitedUserId: true,
-              status: true,
-            },
-          });
-
-          if (!invitation) throw new AppError("Invitation not found", 404);
-
-          if (invitation.invitedUserId !== myId)
-            throw new AppError("Not authorized", 403);
-
-          if (invitation.status !== "PENDING")
-            throw new AppError("Invitation already processed", 409);
-
-          await tx.roomInvitation.update({
-            where: { id: invitationId },
-            data: { status: "ACCEPTED" },
-          });
-
+      await prisma.$transaction(async (tx) => {
+        if (action === "APPROVED") {
           await tx.chatRoomMember.create({
             data: {
-              userId: myId,
-              chatRoomId: invitation.roomId,
+              chatRoomId: roomId,
+              userId: request.userId,
               role: "MEMBER",
             },
           });
-        });
+        }
 
-        return res.status(200).json({
-          ok: true,
-          status: "ACCEPTED",
+        await tx.roomJoinRequest.update({
+          where: { id: requestId },
+          data: {
+            status: action === "APPROVED" ? "APPROVED" : "REJECTED",
+            reviewedById: reviewerId,
+            reviewedAt: new Date(),
+          },
         });
-      }
-    } catch (err: any) {
-      if (err instanceof AppError) {
-        return res.status(err.statusCode).json({
-          ok: false,
-          error: err.message,
-        });
-      }
+      });
 
-      if (err?.code === "P2002") {
-        return res.status(409).json({
-          ok: false,
-          error: "User is already a member",
-        });
-      }
-
-      console.error(err);
+      return res.status(200).json({ ok: true });
+    } catch (err) {
+      console.log(err);
       return res.status(500).json({
         ok: false,
-        error: "Server error",
+        error: "Server Error",
       });
     }
   },
