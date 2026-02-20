@@ -22,6 +22,11 @@ enum JoinRequestStatus {
   APPROVED
   REJECTED
 }
+
+enum MessageType {
+  TEXT
+  FILE
+}
 model ChatRoom {
   id             String           @id @default(cuid())
   name           String
@@ -66,7 +71,7 @@ model Message {
   chatRoomId   String?
   directChatId String?
 
-  messageType  String?
+  messageType  MessageType
   fileUri      String?
   fileName     String?
   fileSize     Int?

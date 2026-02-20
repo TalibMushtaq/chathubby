@@ -21,7 +21,15 @@ app.use(
   }),
 );
 
-app.use(sessionMiddleware());
+app.use(sessionMiddleware);
+io.use((socket, next) => {
+  sessionMiddleware(socket.request as any, {} as any, (err: any) => {
+    if (err) {
+      return next(err);
+    }
+    next();
+  });
+});
 
 app.use((req, _res, next) => {
   req.io = io;
