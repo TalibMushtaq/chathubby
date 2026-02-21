@@ -11,7 +11,8 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ ok: false, error: "user not logged in" });
     }
 
-    // ------------------ Fast path: session cache ------------------
+    //------------------------- Fast path: session cache -------------------------------
+
     const cached = req.session.userCache as
       | { user: any; cachedAt: number }
       | undefined;
@@ -25,7 +26,8 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       return next();
     }
 
-    // ------------------ Slow path: DB fetch ------------------
+    // -------------------------- Slow path: DB fetch ---------------------------------
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -42,7 +44,8 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ ok: false, error: "user does not exist" });
     }
 
-    // store snapshot in session
+    // ----------------------- Store snapshot in session -------------------------------
+
     req.session.userCache = {
       user,
       cachedAt: Date.now(),

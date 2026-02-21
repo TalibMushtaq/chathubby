@@ -1,1 +1,52 @@
-import { Router, Request, Response } from "express";
+import type { Server, Socket } from "socket.io";
+import { assertRoomAccess } from "../../middleware/socketAccess";
+import { prisma } from "../../../db/prisma";
+import { chatRoomMessageSchema } from "@repo/validators";
+
+export function registerRoomChat(io: Server, socket: Socket) {
+  const user = (socket.request as any).user;
+
+  // JOIN
+  socket.on("chatRoom:join", async ({ chatRoomId }) => {
+    try {
+      if (typeof chatRoomId !== "string") {
+        throw new Error("Invalid room id");
+      }
+
+      await assertRoomAccess(user.id, chatRoomId);
+
+      socket.join(`room:${chatRoomId}`);
+      socket.emit("chatroom:joined", { chatRoomId });
+    } catch (err: any) {
+      socket.emit("error", err.message);
+    }
+  });
+
+  // Messages
+  socket.on("chatroom:message", async ({ paylaod }) => {
+    try {
+      const user = (socket.request as any).user;
+      const result = chatRoomMessageSchema.safeParse(paylaod);
+      if (!result.success) {
+        socket.emit("error", "invalid paylaod");
+        return;
+      }
+      const data = result.data;
+
+      await assertRoomAccess(user.id, data.chatRoomId);
+
+      const message = await prisma.message.create({
+        data: {
+          content: data.content,
+          senderId: user.id,
+          chatRoomId: data.chatRoomId,
+          messageType: data.type,
+        },
+      });
+
+      io.to(`room:${data.chatRoomId}`).emit("chatRoom:new-message", message);
+    } catch (err: any) {
+      socket.emit("error", err.message);
+    }
+  });
+}

@@ -3,7 +3,7 @@ import express from "express";
 import { connectRedis } from "./lib/redis";
 import { prisma } from "../db/prisma";
 import http from "http";
-import { createIO } from "./socket";
+import { createIO } from "./create.io";
 import cors from "cors";
 import { sessionMiddleware } from "./middleware/session";
 import authRoutes from "./routes/auth";

@@ -1,8 +1,29 @@
 import { Router, Request, Response } from "express";
 import requireAuth from "../middleware/requireAuth";
 import { prisma } from "../../db/prisma";
+import { Socket, Server } from "socket.io";
+import { assertDirectChatAccess } from "../middleware/socketAccess";
 
 const router = Router();
+
+//Join IO socket DM
+export function registerDirectChat(io: Server, socket: Socket) {
+  socket.on("directChat:join", async ({ directChatId }) => {
+    try {
+      const user = (socket.request as any).user;
+
+      if (typeof directChatId !== "string") {
+        throw new Error("Invalid chat id");
+      }
+      await assertDirectChatAccess(user.id, directChatId);
+
+      socket.join(`direct:${directChatId}`);
+      socket.emit("directChat:joined", { directChatId });
+    } catch (err: any) {
+      socket.emit("error", err.message);
+    }
+  });
+}
 
 router.post(
   "/start-dm/:userId",
