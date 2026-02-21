@@ -1,7 +1,17 @@
 import { Router, Request, Response } from "express";
 import requireAuth from "../../middleware/requireAuth";
 import { prisma } from "../../../db/prisma";
+import joinRoomInvite from "./joinroominvite";
+import joinRoomRequest from "./joinroomreq";
+import joinRoomlink from "./joinroomlink";
+
 const router = Router();
+
+// join room routes
+
+router.use(joinRoomInvite);
+router.use(joinRoomRequest);
+router.use(joinRoomlink);
 
 // --------------------------Create Room -------------------------
 router.post("/create", requireAuth, async (req: Request, res: Response) => {
@@ -108,3 +118,5 @@ router.get("/rooms", requireAuth, async (req: Request, res: Response) => {
     return res.status(500).json({ ok: false, error: "server error" });
   }
 });
+
+export default router;

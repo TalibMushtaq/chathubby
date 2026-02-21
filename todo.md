@@ -4,8 +4,8 @@
 
 - [ ] add DM pagination (cursor / infinite scroll)
 - [ ] add “mark as read” / unread count
-
 - [ ] Add File send support for both room chat and dm's
+- [ ] Add Delete , Update to the room chat
 
 ## In Progress
 

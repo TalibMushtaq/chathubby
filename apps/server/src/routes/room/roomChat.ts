@@ -23,7 +23,7 @@ export function registerRoomChat(io: Server, socket: Socket) {
   });
 
   // Messages
-  socket.on("chatroom:message", async ({ paylaod }) => {
+  socket.on("chatroom:message", async ({ paylaod, callback }) => {
     try {
       const user = (socket.request as any).user;
       const result = chatRoomMessageSchema.safeParse(paylaod);
@@ -45,8 +45,9 @@ export function registerRoomChat(io: Server, socket: Socket) {
       });
 
       io.to(`room:${data.chatRoomId}`).emit("chatRoom:new-message", message);
+      callback({ ok: true, message });
     } catch (err: any) {
-      socket.emit("error", err.message);
+      callback({ ok: false, error: "Server error" });
     }
   });
 }
