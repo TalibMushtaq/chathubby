@@ -1,8 +1,6 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../../../db/prisma";
 import requireAuth from "../../middleware/requireAuth";
-import { error } from "console";
-
 const router = Router();
 
 router.post(
@@ -54,14 +52,14 @@ router.post(
         });
       }
 
-      const joinRequsest = await prisma.roomJoinRequest.create({
+      const joinRequest = await prisma.roomJoinRequest.create({
         data: {
           roomId: room.id,
           userId: userId,
         },
       });
 
-      return res.status(201).json({ ok: true, joinRequsest });
+      return res.status(201).json({ ok: true, joinRequest });
     } catch (err) {
       console.log(err);
       return res.status(500).json({
