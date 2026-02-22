@@ -1,18 +1,27 @@
+import { Navbar } from "../components/landing/Navbar";
+import { Hero } from "../components/landing/Hero";
+import { PreviewWindow } from "../components/landing/PreviewWindow";
+import { StatsSection } from "../components/landing/Stats";
+import { FeaturesSection } from "../components/landing/Features";
+import { CTASection } from "../components/landing/CTA";
+import { Footer } from "../components/landing/Footer";
 
-import Button from "@repo/ui/Button";
-export default function Home() {
+export default function HomePage() {
   return (
-    <>
-      <div>
-        <h1 className="text-3xl font-bold underline ">Hello world!</h1>
-        <Button size={"lg"}>Hello world!</Button>
-        <Button
-          variant={"outline"}
-          size={"lg"}
-        >
-          Hello world!
-        </Button>
-      </div>
-    </>
+    <main className="bg-bg text-text">
+      <Navbar />
+
+      <Hero />
+
+      <PreviewWindow />
+
+      <StatsSection />
+
+      <FeaturesSection />
+
+      <CTASection />
+
+      <Footer />
+    </main>
   );
 }
