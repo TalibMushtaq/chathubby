@@ -1,9 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { api } from "../lib/api";
+// import { userZod } from "@repo/validators";
 
 export default function AuthCard() {
+  const searchParams = useSearchParams();
+  const mode = searchParams.get("mode");
   const [tab, setTab] = useState<"login" | "signup">("login");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (mode === "signup") setTab("signup");
+    if (mode === "login") setTab("login");
+  });
+  const getStrength = (password: string) => {
+    let score = 0;
+
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    return score; // 0 - 4
+  };
+  const strength = getStrength(password);
+
+  const handelSignup = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      await api.post("/auth/signup", {
+        username,
+      });
+    } catch (err: any) {
+      setError(err.respnce.data.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -115,7 +156,7 @@ export default function AuthCard() {
       {/* Signup Form */}
       {tab === "signup" && (
         <>
-          <div className="flex gap-3 mb-5">
+          {/* <div className="flex gap-3 mb-5">
             <div className="flex-1">
               <label className="block text-xs mb-2 font-medium">
                 First name
@@ -136,9 +177,21 @@ export default function AuthCard() {
                 className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="space-y-5">
+            <div>
+              <label className="block text-xs mb-2 font-medium">Username</label>
+              <input
+                type="username"
+                placeholder="darTalib"
+                className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <span className="text-xs text-gray-500">
+                ChatHubby.app/@alexmorgan
+              </span>
+            </div>
             <div>
               <label className="block text-xs mb-2 font-medium">
                 Email address
@@ -147,6 +200,7 @@ export default function AuthCard() {
                 type="email"
                 placeholder="you@example.com"
                 className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -156,7 +210,29 @@ export default function AuthCard() {
                 type="password"
                 placeholder="Create a strong password"
                 className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
+              <span className="text-xs text-gray-500">
+                Use 8+ chars, a number, and a symbol
+              </span>
+              <div className="flex gap-1 mt-3">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={`flex-1 h-1 rounded transition-all ${
+                      strength > i
+                        ? strength <= 2
+                          ? "bg-red-500"
+                          : strength === 3
+                            ? "bg-yellow-500"
+                            : "bg-green-500"
+                        : "bg-white/10"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 

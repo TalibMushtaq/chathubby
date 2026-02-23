@@ -50,7 +50,7 @@ async function main() {
   app.get("/", (req, res) => {
     res.send("Chathub server running");
   });
-  const port = Number(3000);
+  const port = Number(3100);
   const ioPort = Number(4000);
 
   app.listen(port, () => {

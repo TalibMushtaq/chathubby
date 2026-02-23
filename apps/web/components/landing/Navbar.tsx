@@ -1,6 +1,7 @@
 import Button from "@repo/ui/Button";
 import { Container } from "@repo/ui/Container";
 import Logo from "../icons/Logo";
+import Link from "next/link";
 
 export function Navbar() {
   return (
@@ -43,10 +44,14 @@ export function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              Log in
-            </Button>
-            <Button size="sm">Get started</Button>
+            <Link href={"/auth?mode=login"}>
+              <Button variant="ghost" size="sm">
+                Log in
+              </Button>
+            </Link>
+            <Link href={"/auth?mode=signup"}>
+              <Button size="sm">Get started</Button>
+            </Link>
           </div>
         </div>
       </Container>

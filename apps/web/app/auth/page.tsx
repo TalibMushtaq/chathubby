@@ -18,7 +18,7 @@ export default async function AuthPage() {
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold">
+          <div className="w-13 h-13 rounded-lg flex items-center justify-center font-bold">
             <Logo />
           </div>
           <span className="text-xl font-extrabold tracking-tight">
@@ -31,7 +31,7 @@ export default async function AuthPage() {
           <h2 className="text-4xl font-extrabold leading-tight">
             Conversations,
             <br />
-            <span className="bg-line-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
               reimagined.
             </span>
           </h2>
@@ -42,11 +42,22 @@ export default async function AuthPage() {
         </div>
 
         {/* Social Proof */}
-        <div className="relative z-10 bg-surface-2 border border-white/10 rounded-xl p-5 max-w-sm">
-          <p className="text-sm italic mb-4">
-            “It feels faster and cleaner than anything else we tried.”
+        <div className="relative z-10 max-w-sm bg-surface-2 border border-white/10 rounded-xl p-6">
+          <p className="text-sm italic leading-relaxed mb-4">
+            “ChatHubby completely replaced three different tools for our dev
+            team. It's faster, cleaner, and the threading is 🤌”
           </p>
-          <div className="text-xs text-gray-400">— Early Beta User</div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-linear-to-br from-purple-500 to-blue-500 flex items-center justify-center text-xs font-bold">
+              S
+            </div>
+
+            <div>
+              <div className="text-sm font-semibold">Sofia Chen</div>
+              <div className="text-xs text-gray-400">Early Access User</div>
+            </div>
+          </div>
         </div>
       </div>
 
