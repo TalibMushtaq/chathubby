@@ -9,10 +9,14 @@ export function Navbar() {
       <Container>
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <Logo className="w-12 h-12 transition-transform group-hover:scale-105" />
-            <span className="text-xl font-bold tracking-tight">ChatHubby</span>
-          </div>
+          <Link href={"#"}>
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <Logo className="w-12 h-12 transition-transform group-hover:scale-105" />
+              <span className="text-xl font-bold tracking-tight">
+                ChatHubby
+              </span>
+            </div>
+          </Link>
 
           {/* Links */}
           <div className="hidden md:flex items-center gap-7 text-sm text-muted">

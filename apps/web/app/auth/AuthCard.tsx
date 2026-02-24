@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "../lib/api";
-// import { userZod } from "@repo/validators";
+import { userZod } from "@repo/validators";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function AuthCard() {
   const searchParams = useSearchParams();
@@ -13,12 +15,22 @@ export default function AuthCard() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
 
   useEffect(() => {
     if (mode === "signup") setTab("signup");
     if (mode === "login") setTab("login");
-  });
+  }, [mode]);
+
+  useEffect(() => {
+    if (errors) {
+      toast.error(errors);
+    }
+  }, [errors]);
+
+  //------------password Strength ---------
   const getStrength = (password: string) => {
     let score = 0;
 
@@ -31,16 +43,63 @@ export default function AuthCard() {
   };
   const strength = getStrength(password);
 
+  //---------------HandelLogin--------
+  const HandelLogin = async () => {
+    try {
+      setLoading(true);
+      setErrors("");
+
+      const parsed = userZod.login.safeParse({
+        email,
+        password,
+      });
+
+      if (!parsed.success) {
+        const error: Record<string, string> = {};
+        parsed.error.issues.forEach((issue) => {
+          const field = issue.path[0] as string;
+          error[field] = issue.message;
+        });
+        setFieldErrors(error);
+        return;
+      }
+      await api.post("/auth/login", parsed.data);
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err: any) {
+      console.log(err);
+      setErrors(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //---------------HandelSignup----------------
   const handelSignup = async () => {
     try {
       setLoading(true);
-      setError("");
+      setErrors("");
 
-      await api.post("/auth/signup", {
+      const parsed = userZod.signup.safeParse({
         username,
+        email,
+        password,
       });
+
+      if (!parsed.success) {
+        const error: Record<string, string> = {};
+        parsed.error.issues.forEach((issue) => {
+          const field = issue.path[0] as string;
+          error[field] = issue.message;
+        });
+        setFieldErrors(error);
+        return;
+      }
+      await api.post("/auth/signup", parsed.data);
+      router.push("/dashboard");
+      router.refresh();
     } catch (err: any) {
-      setError(err.respnce.data.message || "Signup failed");
+      setErrors(err.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -72,6 +131,7 @@ export default function AuthCard() {
         </button>
         <button
           onClick={() => setTab("signup")}
+          disabled={loading}
           className={`flex-1 py-2 text-sm rounded-md transition ${
             tab === "signup"
               ? "bg-surface-2 text-white shadow"
@@ -114,7 +174,11 @@ export default function AuthCard() {
                 type="email"
                 placeholder="you@example.com"
                 className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                onChange={(e) => setEmail(e.target.value)}
               />
+              {fieldErrors.email && (
+                <p className="text-red-400 text-xs mt-1">{fieldErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -123,7 +187,13 @@ export default function AuthCard() {
                 type="password"
                 placeholder="Enter your password"
                 className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                onChange={(e) => setPassword(e.target.value)}
               />
+              {fieldErrors.password && (
+                <p className="text-red-400 text-xs mt-1">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
           </div>
 
@@ -137,8 +207,15 @@ export default function AuthCard() {
             </a>
           </div>
 
-          <button className="w-full py-3 bg-purple-600 hover:bg-purple-500 transition rounded-lg text-sm font-semibold shadow-lg shadow-purple-600/20">
-            Sign in
+          <button
+            className="w-full py-3 bg-purple-600 hover:bg-purple-500 transition rounded-lg text-sm font-semibold shadow-lg shadow-purple-600/20"
+            onClick={(e) => {
+              e.preventDefault();
+              HandelLogin();
+            }}
+            disabled={loading}
+          >
+            Login
           </button>
 
           <div className="text-center text-xs text-gray-400 mt-5">
@@ -191,6 +268,11 @@ export default function AuthCard() {
               <span className="text-xs text-gray-500">
                 ChatHubby.app/@alexmorgan
               </span>
+              {fieldErrors.username && (
+                <p className="text-red-400 text-xs mt-1">
+                  {fieldErrors.username}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs mb-2 font-medium">
@@ -202,6 +284,9 @@ export default function AuthCard() {
                 className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {fieldErrors.email && (
+                <p className="text-red-400 text-xs mt-1">{fieldErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -214,6 +299,11 @@ export default function AuthCard() {
                   setPassword(e.target.value);
                 }}
               />
+              {fieldErrors.password && (
+                <p className="text-red-400 text-xs mt-1">
+                  {fieldErrors.password}
+                </p>
+              )}
               <span className="text-xs text-gray-500">
                 Use 8+ chars, a number, and a symbol
               </span>
@@ -248,7 +338,10 @@ export default function AuthCard() {
             .
           </p>
 
-          <button className="w-full mt-6 py-3 bg-purple-600 hover:bg-purple-500 transition rounded-lg text-sm font-semibold shadow-lg shadow-purple-600/20">
+          <button
+            className="w-full mt-6 py-3 bg-purple-600 hover:bg-purple-500 transition rounded-lg text-sm font-semibold shadow-lg shadow-purple-600/20"
+            onClick={handelSignup}
+          >
             Create account
           </button>
 

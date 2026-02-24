@@ -1,6 +1,7 @@
 import Button from "@repo/ui/Button";
 import { Container } from "@repo/ui/Container";
 import { BackgroundBlobs } from "../BackgroundBlobs";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -29,10 +30,15 @@ export function Hero() {
 
         {/* CTAs */}
         <div className="flex justify-center gap-4 flex-wrap">
-          <Button size="lg">Start for free</Button>
-          <Button variant="outline" size="lg">
-            Explore communities →
-          </Button>
+          <Link href={"/auth"}>
+            <Button size="lg">Start for free</Button>
+          </Link>
+
+          <Link href={"#stats"}>
+            <Button variant="outline" size="lg">
+              Explore communities →
+            </Button>
+          </Link>
         </div>
       </Container>
     </section>

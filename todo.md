@@ -6,11 +6,13 @@
 - [ ] add “mark as read” / unread count
 - [ ] Add File send support for both room chat and dm's
 - [ ] Add Delete , Update to the room chat
+- [ ] Add forgot Password endpoint
 
 ## In Progress
 
 ## Completed ✓
 
+- [x] Add proper setError in signup form
 - [x] Auth middleware: session check + fetch user from DB + attach `req.user`
 - [x] Prisma DM schema: `DirectChat` + `Message` with unique pair handling
 - [x] `POST /api/dm/start-dm/:userId` (create/find DM chat)

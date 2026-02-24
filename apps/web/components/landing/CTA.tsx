@@ -1,6 +1,7 @@
 import Card from "@repo/ui/Card";
 import Button from "@repo/ui/Button";
 import { Container } from "@repo/ui/Container";
+import Link from "next/link";
 
 export function CTASection() {
   return (
@@ -22,7 +23,9 @@ export function CTASection() {
               Free forever for small communities. No credit card required.
             </p>
 
-            <Button size="lg">Create your server →</Button>
+            <Link href={"/auth"}>
+              <Button size="lg">Create your server →</Button>
+            </Link>
           </div>
         </Card>
       </Container>

@@ -33,7 +33,7 @@ export const userZod = {
   email: emailSchema,
   username: usernameSchema,
   password: passwordSchema,
-  avatar: avatarSchema,
+  avatar: avatarSchema.optional(),
 
   signup: z.object({
     email: emailSchema,

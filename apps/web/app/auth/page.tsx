@@ -1,13 +1,31 @@
 // app/auth/page.tsx
 
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import AuthCard from "./AuthCard";
 import Logo from "../../components/icons/Logo";
+import Link from "next/link";
 
 export default async function AuthPage() {
-  // Later:
-  // - read cookies()
-  // - redirect if logged in
+  let res: Response | null = null;
+  try {
+    const cookieStore = await cookies();
+    res = await fetch("http://localhost:3100/auth/me", {
+      headers: {
+        Cookie: cookieStore
+          .getAll()
+          .map((c) => `${c.name}=${c.value}`)
+          .join("; "),
+      },
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error("Auth check failed", err);
+  }
 
+  if (res?.ok) {
+    redirect("/dashboard");
+  }
   return (
     <div className="min-h-screen bg-bg text-white flex">
       {/* LEFT PANEL */}
@@ -17,14 +35,16 @@ export default async function AuthPage() {
         <div className="absolute -bottom-40 -right-40 w-100 h-100 bg-blue-600/10 rounded-full blur-3xl" />
 
         {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-13 h-13 rounded-lg flex items-center justify-center font-bold">
-            <Logo />
+        <Link href="/">
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="w-13 h-13 rounded-lg flex items-center justify-center font-bold">
+              <Logo />
+            </div>
+            <span className="text-xl font-extrabold tracking-tight">
+              ChatHubby
+            </span>
           </div>
-          <span className="text-xl font-extrabold tracking-tight">
-            ChatHubby
-          </span>
-        </div>
+        </Link>
 
         {/* Marketing Copy */}
         <div className="relative z-10">
