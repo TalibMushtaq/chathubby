@@ -34,6 +34,7 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
         id: true,
         email: true,
         username: true,
+        displayname: true,
         avatar: true,
         createdAt: true,
       },

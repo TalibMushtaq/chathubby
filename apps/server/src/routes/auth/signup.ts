@@ -30,6 +30,7 @@ router.post("/signup", async (req: Request, res: Response) => {
     const email = parseResult.data.email.trim().toLowerCase();
     const username = parseResult.data.username.trim().toLowerCase();
     const password = parseResult.data.password;
+    const displayname = parseResult.data.displayname;
 
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { username }] },
@@ -50,12 +51,14 @@ router.post("/signup", async (req: Request, res: Response) => {
         id: crypto.randomUUID(),
         email,
         username,
+        displayname,
         passwordHash,
         updatedAt: new Date(),
       },
       select: {
         id: true,
         email: true,
+        displayname: true,
         username: true,
         createdAt: true,
       },

@@ -71,7 +71,7 @@ model Message {
   chatRoomId   String?
   directChatId String?
 
-  messageType  MessageType
+  messageType  MessageType @default(TEXT)
   fileUri      String?
   fileName     String?
   fileSize     Int?
@@ -106,9 +106,11 @@ model DirectChat {
 model User {
   id                                  String           @id
   email                               String           @unique
+  displayname                         String           
   username                            String           @unique
   passwordHash                        String?
   avatar                              String?
+  bio                                 String?
   createdAt                           DateTime         @default(now())
   updatedAt                           DateTime
   ChatRoom                            ChatRoom[]

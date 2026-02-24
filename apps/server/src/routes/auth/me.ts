@@ -15,7 +15,8 @@ router.get("/me", async (req: Request, res: Response) => {
       where: { id: userid },
       select: {
         id: true,
-        email: true, // update it to use auth middleware for user data
+        email: true,
+        displayname: true, // update it to use auth middleware for user data
         username: true,
         avatar: true,
         createdAt: true,

@@ -20,7 +20,6 @@ export const metadata: Metadata = {
     icon: "/logo.svg",
   },
 };
-
 export default function RootLayout({
   children,
 }: {

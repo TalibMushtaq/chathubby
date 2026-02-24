@@ -7,6 +7,7 @@
 - [ ] Add File send support for both room chat and dm's
 - [ ] Add Delete , Update to the room chat
 - [ ] Add forgot Password endpoint
+- [ ] Create Backend Endpoint GET /dashboard/overview
 
 ## In Progress
 

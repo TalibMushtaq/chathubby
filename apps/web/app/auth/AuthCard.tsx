@@ -13,6 +13,7 @@ export default function AuthCard() {
   const [tab, setTab] = useState<"login" | "signup">("login");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [displayname, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState("");
@@ -82,6 +83,7 @@ export default function AuthCard() {
 
       const parsed = userZod.signup.safeParse({
         username,
+        displayname,
         email,
         password,
       });
@@ -286,6 +288,22 @@ export default function AuthCard() {
               />
               {fieldErrors.email && (
                 <p className="text-red-400 text-xs mt-1">{fieldErrors.email}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs mb-2 font-medium">
+                Display Name
+              </label>
+              <input
+                type="displayname"
+                placeholder="talib"
+                className="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+              {fieldErrors.displayname && (
+                <p className="text-red-400 text-xs mt-1">
+                  {fieldErrors.displayname}
+                </p>
               )}
             </div>
 

@@ -12,6 +12,14 @@
   --color-primary-hover: #7c74ff;
   --color-success: #43e97b;
 
+  --color-surface-3: #20242f;
+
+  --color-accent-2: #ff6584;
+  --color-accent-3: #43e97b;
+
+  --color-warn: #ffbd2e;
+  --color-glow: rgba(108 99 255 / 0.25);
+
   --color-border: rgba(255 255 255 / 0.07);
 }
 

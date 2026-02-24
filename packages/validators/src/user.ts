@@ -17,6 +17,11 @@ const passwordSchema = z
   .min(8, "Password must be at least 8 characters")
   .max(72, "Password must be at most 72 characters");
 
+const displaynameSchema = z
+  .string()
+  .min(3, "Username must be at least 3 characters")
+  .max(20, "Username must be at most 20 characters");
+
 const avatarSchema = z.url().trim().optional().nullable();
 
 const loginWithEmail = z.object({
@@ -32,12 +37,14 @@ const loginWithUsername = z.object({
 export const userZod = {
   email: emailSchema,
   username: usernameSchema,
+  displayname: displaynameSchema,
   password: passwordSchema,
   avatar: avatarSchema.optional(),
 
   signup: z.object({
     email: emailSchema,
     username: usernameSchema,
+    displayname: displaynameSchema,
     password: passwordSchema,
   }),
 
@@ -46,8 +53,8 @@ export const userZod = {
   updateMe: z
     .object({
       username: usernameSchema.optional(),
-      avatar: avatarSchema,
-
+      avatar: avatarSchema.optional(),
+      displayname: displaynameSchema.optional(),
       currentPassword: z.string().min(1).optional(),
       newPassword: passwordSchema.optional(),
     })
