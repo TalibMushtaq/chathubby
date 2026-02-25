@@ -6,11 +6,14 @@ import ServersCard from "./components/ServersCard";
 import ActivityCard from "./components/ActivityCard";
 import ActionsCard from "./components/ActionCard";
 import MembersCard from "./components/MembersCard";
+import { serverApi } from "../lib/serverApi";
 
 interface User {
   displayName?: string;
   username: string;
 }
+
+const api = await serverApi();
 
 export default async function DashboardPage() {
   const baseUrl = process.env.API_URL;
@@ -19,12 +22,7 @@ export default async function DashboardPage() {
     throw new Error("API_URL not defined");
   }
 
-  const res = await fetch(`${baseUrl}/auth/me`, {
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  const data = await res.json();
+  const { data } = await api.get("/auth/me");
 
   if (!data.ok) {
     throw new Error("Failed to fetch user");
