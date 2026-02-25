@@ -1,35 +1,22 @@
 import DashboardSidebar from "./components/DashboardSidebar";
 import DashboardTopbar from "./components/DashboardTopbar";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { serverApi } from "../lib/serverApi";
+
+const api = await serverApi();
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const baseUrl = process.env.API_URL;
+  const { data } = await api.get("/auth/me");
 
-  if (!baseUrl) {
-    throw new Error("API_URL is not defined");
-  }
-
-  const res = await fetch(`${baseUrl}/auth/me`, {
-    headers: {
-      Cookie: cookieStore
-        .getAll()
-        .map((c) => `${c.name}=${c.value}`)
-        .join("; "),
-    },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
+  if (!data.ok) {
     redirect("/auth");
   }
 
-  const user = await res.json();
+  const user = await data.user;
 
   return (
     <div className="flex min-h-screen bg-bg text-text">

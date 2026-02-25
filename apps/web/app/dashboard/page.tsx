@@ -16,12 +16,6 @@ interface User {
 const api = await serverApi();
 
 export default async function DashboardPage() {
-  const baseUrl = process.env.API_URL;
-
-  if (!baseUrl) {
-    throw new Error("API_URL not defined");
-  }
-
   const { data } = await api.get("/auth/me");
 
   if (!data.ok) {
