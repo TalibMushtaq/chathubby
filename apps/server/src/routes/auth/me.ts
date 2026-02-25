@@ -1,22 +1,23 @@
 import { Request, Response } from "express";
 import express from "express";
 import { prisma } from "../../../db/prisma";
+import requireAuth from "../../middleware/requireAuth";
 
 const router = express.Router();
 
-router.get("/me", async (req: Request, res: Response) => {
+router.get("/me", requireAuth, async (req: Request, res: Response) => {
   try {
-    const userid = req.session.userId;
+    const userid = req.user!.id;
 
     if (!userid)
-      return res.status(401).json({ ok: false, error: "Not logged in " });
+      return res.status(401).json({ ok: false, error: "Not logged in" });
 
     const user = await prisma.user.findUnique({
       where: { id: userid },
       select: {
         id: true,
         email: true,
-        displayname: true, // update it to use auth middleware for user data
+        displayname: true,
         username: true,
         avatar: true,
         createdAt: true,

@@ -6,7 +6,9 @@ interface Props {
   };
 }
 export default function DashboardSidebar({ user }: Props) {
-  const initial = user.displayname?.[0] ?? user.username[0];
+  const initial =
+    user?.displayname?.charAt(0) || user?.username?.charAt(0) || "U";
+
   return (
     <aside className="w-18 bg-surface border-r border-border flex flex-col items-center py-4 gap-1">
       <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white text-xl mb-3">

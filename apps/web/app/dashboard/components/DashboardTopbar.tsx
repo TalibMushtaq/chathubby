@@ -2,14 +2,14 @@
 
 interface Props {
   user: {
-    displayName?: string;
+    displayname?: string;
     username: string;
   };
 }
 
 export default function DashboardTopbar({ user }: Props) {
   const initial =
-    user?.displayName?.charAt(0) || user?.username?.charAt(0) || "U";
+    user?.displayname?.charAt(0) || user?.username?.charAt(0) || "U";
 
   return (
     <header className="h-15 border-b border-border bg-bg/80 backdrop-blur flex items-center px-8">

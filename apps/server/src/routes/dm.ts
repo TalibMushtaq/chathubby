@@ -133,7 +133,7 @@ router.post(
           content: text,
           senderId,
           directChatId,
-          messageType: "text",
+          messageType: "TEXT",
         },
         select: {
           id: true,

@@ -24,8 +24,12 @@ export default async function DashboardPage() {
     cache: "no-store",
   });
 
-  const user: User = await res.json();
+  const data = await res.json();
 
+  if (!data.ok) {
+    throw new Error("Failed to fetch user");
+  }
+  const user = data.user;
   return (
     <>
       <div className="col-span-3 mb-2">
