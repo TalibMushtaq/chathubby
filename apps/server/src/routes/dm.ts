@@ -17,7 +17,7 @@ export function registerDirectChat(io: Server, socket: Socket) {
       }
       await assertDirectChatAccess(user.id, directChatId);
 
-      socket.join(`direct:${directChatId}`);
+      socket.join(`directChat:${directChatId}`);
       socket.emit("directChat:joined", { directChatId });
     } catch (err: any) {
       socket.emit("error", err.message);
@@ -128,30 +128,37 @@ router.post(
       if (!isMember)
         return res.status(403).json({ ok: false, error: "not a participant" });
 
-      const message = await prisma.message.create({
-        data: {
-          content: text,
-          senderId,
-          directChatId,
-          messageType: "TEXT",
-        },
-        select: {
-          id: true,
-          content: true,
-          senderId: true,
-          directChatId: true,
-          createdAt: true,
-        },
-      });
-      await prisma.directChat.update({
-        where: { id: directChatId },
-        data: { lastMessageAt: message.createdAt },
+      const result = await prisma.$transaction(async (tx) => {
+        const message = await tx.message.create({
+          data: {
+            content: text,
+            senderId,
+            directChatId,
+            messageType: "TEXT",
+          },
+          select: {
+            id: true,
+            content: true,
+            senderId: true,
+            directChatId: true,
+            createdAt: true,
+          },
+        });
+
+        await tx.directChat.update({
+          where: { id: directChatId },
+          data: {
+            lastMessageAt: new Date(),
+          },
+        });
+
+        return message;
       });
       req.io
         .to(`directChat:${directChatId}`)
         .emit("inbox:update", { directChatId });
-      req.io.to(`directChat:${directChatId}`).emit("message:new", message);
-      return res.status(201).json({ ok: true, message });
+      req.io.to(`directChat:${directChatId}`).emit("message:new", result);
+      return res.status(201).json({ ok: true, result });
     } catch (err) {
       console.log(err);
       return res.status(500).json({ ok: false, error: "server error" });
@@ -260,7 +267,7 @@ router.get("/inbox", requireAuth, async (req: Request, res: Response) => {
 });
 
 router.delete(
-  "/:messageId",
+  "/message/:messageId",
   requireAuth,
   async (req: Request, res: Response) => {
     try {
@@ -317,7 +324,7 @@ router.delete(
 );
 
 router.patch(
-  "/:messageId",
+  "/message/:messageId",
   requireAuth,
   async (req: Request, res: Response) => {
     try {
