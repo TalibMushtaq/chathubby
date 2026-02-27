@@ -9,6 +9,7 @@ import { sessionMiddleware } from "./middleware/session";
 import authRoutes from "./routes/auth";
 import dmRoutes from "./routes/dm";
 import room from "./routes/room/room";
+import searchUser from "./routes/searchUser";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -40,6 +41,7 @@ app.use((req, _res, next) => {
 app.use("/auth", authRoutes);
 app.use("/api/dm", dmRoutes);
 app.use("/api/room", room);
+app.use("/api/search", searchUser);
 
 async function main() {
   await connectRedis();

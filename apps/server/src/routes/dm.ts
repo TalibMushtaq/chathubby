@@ -212,6 +212,9 @@ router.get(
     }
   },
 );
+
+// end poit to get updated messages
+
 router.get("/inbox", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
@@ -265,6 +268,8 @@ router.get("/inbox", requireAuth, async (req: Request, res: Response) => {
     return res.status(500).json({ ok: false, error: "server error" });
   }
 });
+
+// delete meessage endpont
 
 router.delete(
   "/message/:messageId",
@@ -322,6 +327,8 @@ router.delete(
     }
   },
 );
+
+// edit messages
 
 router.patch(
   "/message/:messageId",
