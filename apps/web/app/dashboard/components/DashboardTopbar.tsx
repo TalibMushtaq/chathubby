@@ -1,13 +1,10 @@
 // DashboardTopbar.tsx
-import { serverApi } from "../../lib/serverApi";
 interface Props {
   user: {
     displayname?: string;
     username: string;
   };
 }
-
-const api = serverApi();
 
 export default function DashboardTopbar({ user }: Props) {
   const initial =

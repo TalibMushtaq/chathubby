@@ -9,7 +9,6 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const api = await serverApi();
-
   const { data } = await api.get("/auth/me");
 
   if (!data.ok) {
@@ -19,13 +18,14 @@ export default async function DashboardLayout({
   const user = data.user;
 
   return (
-    <div className="flex min-h-screen bg-bg text-text">
+    <div className="flex h-screen overflow-hidden bg-[--color-bg] text-[--color-text]">
       <DashboardSidebar user={user} />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <DashboardTopbar user={user} />
 
-        <main className="p-8 grid grid-cols-3 gap-5">{children}</main>
+        {/* Let pages decide their own layout */}
+        <main className="flex-1 min-w-0 overflow-hidden">{children}</main>
       </div>
     </div>
   );

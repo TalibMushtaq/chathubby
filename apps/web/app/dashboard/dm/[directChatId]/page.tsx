@@ -7,8 +7,9 @@ export default async function DirectChatPage({
   params: { directChatId: string };
 }) {
   const { directChatId } = await params;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className="flex flex-col w-full h-full overflow-hidden">
       <DMMessages directChatId={directChatId} />
       <DMInput directChatId={directChatId} />
     </div>

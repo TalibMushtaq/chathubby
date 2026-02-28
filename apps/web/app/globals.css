@@ -1,25 +1,18 @@
 @import "tailwindcss";
-
 @theme inline {
   --color-bg: #0a0b0f;
   --color-surface: #111318;
   --color-surface-2: #1a1d26;
-
   --color-text: #e8eaf0;
   --color-muted: #6b7080;
-
   --color-primary: #6c63ff;
   --color-primary-hover: #7c74ff;
   --color-success: #43e97b;
-
   --color-surface-3: #20242f;
-
   --color-accent-2: #ff6584;
   --color-accent-3: #43e97b;
-
   --color-warn: #ffbd2e;
   --color-glow: rgba(108 99 255 / 0.25);
-
   --color-border: rgba(255 255 255 / 0.07);
 }
 
@@ -31,12 +24,44 @@
   --color-muted: #6b7280;
   --color-border: rgba(0 0 0 / 0.08);
 }
+
 @keyframes drift {
   from {
     transform: translate(0, 0) scale(1);
   }
   to {
     transform: translate(30px, 20px) scale(1.05);
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSpring {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -53,4 +78,5 @@
 html {
   scroll-behavior: smooth;
 }
+
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
