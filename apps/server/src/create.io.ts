@@ -3,6 +3,7 @@ import { registerRoomChat } from "./routes/room/roomChat";
 import { registerDirectChat } from "./routes/dm";
 import { Server } from "socket.io";
 import type { Server as HTTPServer } from "http";
+import { sessionMiddleware } from "./middleware/session";
 
 export function createIO(httpServer: HTTPServer) {
   const io = new Server(httpServer, {
@@ -10,6 +11,9 @@ export function createIO(httpServer: HTTPServer) {
       origin: true,
       credentials: true,
     },
+  });
+  io.use((socket, next) => {
+    sessionMiddleware(socket.request as any, {} as any, next as any);
   });
   io.use(socketAuth);
   io.on("connection", (socket) => {

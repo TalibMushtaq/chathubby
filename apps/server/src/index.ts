@@ -38,7 +38,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/dm", dmRoutes);
 app.use("/api/room", room);
 app.use("/api/search", searchUser);
@@ -52,14 +52,9 @@ async function main() {
   app.get("/", (req, res) => {
     res.send("Chathub server running");
   });
-  const port = Number(3100);
-  const ioPort = Number(4000);
-
-  app.listen(port, () => {
-    console.log(`server running on http://localhost:${port}`);
-  });
-  httpServer.listen(ioPort, () => {
-    console.log(`web socket server running on ${ioPort}`);
+  const Port = Number(3100);
+  httpServer.listen(Port, () => {
+    console.log(`web socket server running on ${Port}`);
   });
 }
 

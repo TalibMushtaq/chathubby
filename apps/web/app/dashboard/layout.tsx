@@ -3,20 +3,20 @@ import DashboardTopbar from "./components/DashboardTopbar";
 import { redirect } from "next/navigation";
 import { serverApi } from "../lib/serverApi";
 
-const api = await serverApi();
-
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const api = await serverApi();
+
   const { data } = await api.get("/auth/me");
 
   if (!data.ok) {
     redirect("/auth");
   }
 
-  const user = await data.user;
+  const user = data.user;
 
   return (
     <div className="flex min-h-screen bg-bg text-text">

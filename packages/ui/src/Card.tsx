@@ -28,6 +28,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
                     className
                 )}
             />
+
         );
     }
 );
