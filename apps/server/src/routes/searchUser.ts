@@ -34,4 +34,25 @@ router.get("/users", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
+router.get("/usersById", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = (req.query.userId as string)?.trim();
+    if (!userId)
+      return res.status(400).json({ ok: false, error: "UserId missing" });
+
+    const users = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        username: true,
+        displayname: true,
+        avatar: true,
+      },
+    });
+    return res.status(200).json({ ok: true, users });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ ok: false, error: "Server Error" });
+  }
+});
+
 export default router;

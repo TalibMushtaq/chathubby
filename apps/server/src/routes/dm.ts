@@ -200,9 +200,22 @@ router.get(
         select: {
           id: true,
           content: true,
-          senderId: true,
-          directChatId: true,
           createdAt: true,
+          messageType: true,
+          fileUri: true,
+          fileName: true,
+          fileSize: true,
+          isDeleted: true,
+          editedAt: true,
+
+          User: {
+            select: {
+              id: true,
+              username: true,
+              displayname: true,
+              avatar: true,
+            },
+          },
         },
       });
       return res.json({ ok: true, messages });

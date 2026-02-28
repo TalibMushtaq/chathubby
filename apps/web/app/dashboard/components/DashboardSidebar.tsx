@@ -28,10 +28,6 @@ export default function DashboardSidebar({ user }: Props) {
       <button className="w-11 h-11 rounded-xl text-muted hover:bg-surface-2 hover:text-text transition">
         🔭
       </button>
-
-      <div className="mt-auto w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold">
-        Y
-      </div>
     </aside>
   );
 }
