@@ -1,24 +1,11 @@
-"use client";
+import DirectChatClient from "./DirectChatClient";
 
-import DMMessages from "../../../../components/dmComponent/DMMessages";
-import DMInput from "../../../../components/dmComponent/DMInput";
-import DMChatTopbar from "../../components/DMChatTopbar";
-import { useDMSidebar } from "../layout";
-
-export default function DirectChatClient({
-  directChatId,
+export default async function DirectChatPage({
+  params,
 }: {
-  directChatId: string;
+  params: { directChatId: string };
 }) {
-  const { openSidebar } = useDMSidebar();
+  const { directChatId } = await params;
 
-  return (
-    <div className="flex flex-col w-full h-full overflow-hidden">
-      {/* Mobile-only topbar: ← back | username | ☰ sidebar */}
-      <DMChatTopbar directChatId={directChatId} onMenuOpen={openSidebar} />
-
-      <DMMessages directChatId={directChatId} />
-      <DMInput directChatId={directChatId} />
-    </div>
-  );
+  return <DirectChatClient directChatId={directChatId} />;
 }
