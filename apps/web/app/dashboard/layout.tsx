@@ -1,5 +1,4 @@
 import DashboardSidebar from "./components/DashboardSidebar";
-import DashboardTopbar from "./components/DashboardTopbar";
 import { redirect } from "next/navigation";
 import { serverApi } from "../lib/serverApi";
 
@@ -22,9 +21,7 @@ export default async function DashboardLayout({
       <DashboardSidebar user={user} />
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <DashboardTopbar user={user} />
-
-        {/* Let pages decide their own layout */}
+        {/* No more DashboardTopbar here — child pages render their own */}
         <main className="flex-1 min-w-0 overflow-hidden">{children}</main>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import DMMessages from "../../../../components/dmComponent/DMMessages";
 import DMInput from "../../../../components/dmComponent/DMInput";
-import DMChatTopbar from "../../components/DashboardTopbar";
+import DMChatTopbar from "../../components/DMChatTopbar";
 import { useDMSidebar } from "../layout";
 
 export default function DirectChatClient({

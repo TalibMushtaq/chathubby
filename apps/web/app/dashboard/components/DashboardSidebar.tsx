@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logo from "../../../components/icons/Logo";
 
 interface Props {
   user: {
@@ -31,9 +32,7 @@ export default function DashboardSidebar({ user }: Props) {
 
   return (
     <aside className="w-18 bg-surface border-r border-border flex flex-col items-center py-4 gap-1">
-      <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white text-xl mb-3">
-        ⚡
-      </div>
+      <Logo className="w-12 h-12 transition-transform group-hover:scale-105" />
 
       <div className="w-8 h-px bg-border my-1" />
 
